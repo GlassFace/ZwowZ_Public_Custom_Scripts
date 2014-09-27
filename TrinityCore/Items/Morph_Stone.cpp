@@ -5,8 +5,7 @@
 /* Feel free to modify/redistribute this script and its contents */
 class Morph_Stone : public ItemScript
 {
-public:
-	Morph_Stone() : ItemScript("Morph_Stone") { }
+public: Morph_Stone() : ItemScript("Morph_Stone"){}
 	char chrmsg[200];
 
 	bool OnUse(Player* player, Item* item, SpellCastTargets const& targets)
@@ -25,16 +24,16 @@ public:
 		switch (action)
 		{
 			//demorph
-		case 2:
-		{
-			player->DeMorph();
-			int32 DisplayId = player->GetDisplayId();
-			//tell player
-			sprintf(chrmsg, "|cff9cff00[Morph Stone] Default display Id restored to: %u.|r", DisplayId);
-			ChatHandler(player->GetSession()).SendSysMessage(chrmsg);
-			player->CLOSE_GOSSIP_MENU();
-			break;
-		}
+			case 2:
+			{
+				player->DeMorph();
+				int32 DisplayId = player->GetDisplayId();
+				//tell player
+				sprintf(chrmsg, "|cff9cff00[Morph Stone] Default display Id restored to: %u.|r", DisplayId);
+				ChatHandler(player->GetSession()).SendSysMessage(chrmsg);
+				player->CLOSE_GOSSIP_MENU();
+				break;
+			}
 		}
 	}
 
