@@ -1,6 +1,7 @@
 /* Morph stone */
 /* Created By LevenHarvest */
 /* @ https://zwowz.com */
+/* Skype: leben.harvest */
 /* Feel free to modify/redistribute this script and its contents */
 class Morph_Stone : public ItemScript
 {
