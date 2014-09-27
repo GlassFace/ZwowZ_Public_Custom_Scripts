@@ -37,7 +37,7 @@ public: npc_reset() : CreatureScript("npc_reset"){}
 				pPlayer->CLOSE_GOSSIP_MENU();
 				pPlayer->ResetTalents(true);
 				pPlayer->SendTalentsInfoData();
-				char msg[200] = "You have reset your talents.";
+				char msg[200];
 				sprintf(msg, "|cff9cff00[Reset NPC]: Talents Have been reset.");
 				ChatHandler(pPlayer->GetSession()).SendSysMessage(msg); //tell player
 			}
