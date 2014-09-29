@@ -1,9 +1,9 @@
-/* Reset NPC */
+/* Account Predator */
 /* Created By LevenHarvest */
 /* @ https://zwowz.com */
 /* Skype: leben.harvest */
 /* Feel free to modify/redistribute this script and its contents */
-/* Command Usage: .predator warn "target", .predator toggle "target", .predator comment ""*/
+/* Command Usage: .predator warn "target", .predator toggle "target", .predator comment "comment about selected player" */
 #include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "Chat.h"
@@ -12,10 +12,10 @@
 #include "ObjectMgr.h"
 #include "AccountMgr.h"
 int32 MinWarningsBeforeBan = 3;//3 warnings before character gets a ban
-int32 MaxWarningsBeforeBan = 7;//Perm ban @ 7 warnings.
+int32 MaxWarningsBeforeBan = 7;//ban @ 7 warnings.
 std::string DayBan = "86400000";//1 day ban / Miliseconds
 std::string WeekBan = "604800000";//7 day ban
-char charmsg[200];
+int32 Accid = 0;
 
 class Predator : public PlayerScript
 {
@@ -24,58 +24,58 @@ public:
 
 	void OnLogin(Player* player)
 	{
-		QueryResult result0 = LoginDatabase.PQuery("SELECT Id, CharacterName, Predator, Warnings, Comment FROM Account_Predator WHERE Id='%u'", player->GetSession()->GetAccountId());
-		do {
-			if (result0)
+		QueryResult result;
+		Accid = player->GetSession()->GetAccountId();
+		int32 predator = 0;
+		int32 Warnings = 0;
+		char charmsg[200];
+		std::string Comment = "NULL";
+		result = LoginDatabase.PQuery("SELECT `Id`, `CharacterName`, `Predator`, `Warnings`, `Comment` FROM `Account_Predator` WHERE `Id` = '%u'", Accid);
+		if (result)
+		{
+			do
 			{
-				Field* fields = result0->Fetch();
-				int32 Id = fields[0].GetInt32();
-				std::string Name = fields[1].GetString();
-				int32 Predator = fields[2].GetInt32();
-				int32 Warnings = fields[3].GetInt32();
-				std::string Comment = fields[4].GetString();
+				Field *fields = result->Fetch();
+				Accid = fields[0].GetInt32();
+				std::string chrName = fields[1].GetString();
+				predator = fields[2].GetInt32();
+				Warnings = fields[3].GetInt32();
+				Comment = fields[4].GetString();
 
-				if (Predator == 1 && Warnings >= 1)
+				if (Accid == player->GetSession()->GetAccountId() && predator == 1)
 				{
-					sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, Has logged in. This player is under surveilence! This player has %u warnings. Most recent comment: %s|r", Id, player->GetName(), Warnings, Comment.c_str());
+					sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, Has logged in. This player is under surveilence! Warnings: %u, Comment: %s|r", Accid, player->GetName(), Warnings, Comment.c_str());
 					sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
 				}
-			}
-		} while (result0->NextRow());
-		//Check if player already exist in predator table
-		int32 Id = player->GetSession()->GetAccountId();
-		std::string Name = player->GetName();
-		std::string Comment = "NULL";
-		//
-		QueryResult result1 = LoginDatabase.PQuery("SELECT Id FROM Account_Predator WHERE Id='%u'", Id);
-		if (result1)
-		{
-			do {
-				Field* fields = result1->Fetch();
-				int32 Id = fields[0].GetInt32();
-			} while (result1->NextRow());
-		}else
-		{//Create initial predator entry.
-			LoginDatabase.PExecute("INSERT INTO Account_Predator(Id, CharacterName, Predator, Warnings, Comment) VALUES ('%u', '%s', '%u', '%u', '%s')", Id, Name.c_str(), 0, 0, Comment.c_str());
+			} while (result->NextRow());//loop
 		}
 	}
 
 	void OnLogout(Player* player)
 	{
-		QueryResult result3 = LoginDatabase.PQuery("SELECT Id, CharacterName, Predator, Warnings, Comment FROM Account_Predator WHERE Id='%u'", player->GetSession()->GetAccountId());
-	do {
-			Field* fields = result3->Fetch();
-			int32 Id = fields[0].GetInt32();
-			std::string Name = fields[1].GetString();
-			int32 Predator = fields[2].GetInt32();
-			int32 Warnings = fields[3].GetInt32();
+		QueryResult result;
+		Accid = player->GetSession()->GetAccountId();
+		int32 predator = 0;
+		int32 Warnings = 0;
+		char charmsg[200];
+		std::string Comment = "NULL";
+		result = LoginDatabase.PQuery("SELECT `Id`, `CharacterName`, `Predator`, `Warnings`, `Comment` FROM `Account_Predator` WHERE `Id` = '%u'", Accid);
+		if (result)
+		{
+		do {
+				Field* fields = result->Fetch();
+				int32 Id = fields[0].GetInt32();
+				std::string chrName = fields[1].GetString();
+				int32 Predator = fields[2].GetInt32();
+				int32 Warnings = fields[3].GetInt32();
 
-			if (Predator == 1 && Warnings >= 1)
-			{
-				sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, Has logged out.|r", Id, player->GetName());
-				sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
-			}
-		} while (result3->NextRow());
+				if (Predator == 1 && Warnings >= 1)
+				{
+					sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, Has logged out.|r", Accid, chrName.c_str());
+					sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
+				}
+			} while (result->NextRow());
+		}
 	}
 };
 
@@ -104,11 +104,21 @@ public:
 
 	static bool HandleWarnCommand(ChatHandler* handler, const char* args)
 	{
-		if (!*args)
-			return false;
-
-		Player* target = handler->getSelectedPlayer();
+		Player* target;
+		uint64 targetGuid;
+		std::string targetName;
 		std::string gmName = handler->GetSession()->GetPlayerName();
+		std::string Comment = "NULL";
+
+		uint32 parseGUID = MAKE_NEW_GUID(atol((char*)args), 0, HIGHGUID_PLAYER);
+
+		if (sObjectMgr->GetPlayerNameByGUID(parseGUID, targetName))
+		{
+			target = sObjectMgr->GetPlayerByLowGUID(parseGUID);
+			targetGuid = parseGUID;
+		}
+		else if (!handler->extractPlayerTarget((char*)args, &target, &targetGuid, &targetName))
+			return false;
 
 		if (!target)
 		{
@@ -119,32 +129,34 @@ public:
 
 		if (target)
 		{
-			QueryResult result = LoginDatabase.PQuery("SELECT Id, CharacterName, Predator, Warnings, Comment FROM Account_Predator WHERE Id='%u'", target->GetSession()->GetAccountId());
+			QueryResult result = LoginDatabase.PQuery("SELECT `Id`, `CharacterName`, `Predator`, `Warnings`, `Comment` FROM `Account_Predator` WHERE `Id`='%u'", target->GetSession()->GetAccountId());
 			if (result)
 			{
 			do {
 					Field* fields = result->Fetch();
-					int32 Id = fields[0].GetInt32();
+					Accid = fields[0].GetInt32();
 					std::string chrName = fields[1].GetString();
 					int32 Predator = fields[2].GetInt32();
 					int32 Warnings = fields[3].GetInt32();
-					std::string comment = fields[4].GetString();
+					Comment = fields[4].GetString();
 					std::string plrban;
 					//ban
 					std::string banString;
 					banString = "Predator Auto-Ban - Exceeded warning limit!";
+					//
+					char charmsg[200];
 
 					if (Warnings >= MaxWarningsBeforeBan)//7+ strikes //1 week account ban
 					{
 						sWorld->BanAccount(BAN_CHARACTER, target->GetName(), WeekBan, banString, "Predator Auto-Ban");
-						sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, has been banned by the PREDATOR System! Too many warnings! Warnings:%u, Last Comment: %s|r", Id, chrName.c_str(), Warnings, comment.c_str());
+						sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, has been banned by the PREDATOR System! Too many warnings! Warnings:%u, Last Comment: %s|r", Accid, chrName.c_str(), Warnings, Comment.c_str());
 						sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
 						return false;
 					}
 					if (Warnings >= MinWarningsBeforeBan)//3+ strikes //1 day account ban
 					{
 						sWorld->BanAccount(BAN_CHARACTER, target->GetName(), DayBan, banString, "Predator Auto-Ban");
-						sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, has been banned by the PREDATOR System! Too many warnings! Warnings:%u, Last Comment: %s|r", Id, chrName.c_str(), Warnings, comment.c_str());
+						sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, has been banned by the PREDATOR System! Too many warnings! Warnings:%u, Last Comment: %s|r", Accid, chrName.c_str(), Warnings, Comment.c_str());
 						sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
 						return false;
 					}
@@ -157,11 +169,16 @@ public:
 					}else
 					{
 						LoginDatabase.PExecute("UPDATE Account_Predator SET Warnings=Warnings+1 WHERE Id='%u'", target->GetSession()->GetAccountId());
-
 						sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, The Warnings of this account has been increased by 1 by %s!|r", target->GetSession()->GetAccountId(), target->GetName(), gmName.c_str());
 						sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
 					}
 				} while (result->NextRow());
+			}else
+			{//create initial Predator entry for warning.
+				char charmsg[200];
+				LoginDatabase.PExecute("INSERT INTO Account_Predator VALUES('%u', '%s', '%u', '%u','%s')", target->GetSession()->GetAccountId(), target->GetName(), 1, 1, Comment.c_str());
+				sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, Predator has been enabled for this account by %s!|r", target->GetSession()->GetAccountId(), target->GetName(), gmName.c_str());
+				sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
 			}
 		}
 		return true;
@@ -183,7 +200,7 @@ public:
 
 		if (target)
 		{
-			QueryResult result = LoginDatabase.PQuery("SELECT Id FROM Account_Predator WHERE Id='%u'", target->GetSession()->GetAccountId());
+			QueryResult result = LoginDatabase.PQuery("SELECT `Id` FROM `Account_Predator` WHERE `Id`='%u'", target->GetSession()->GetAccountId());
 			if (result)
 			{
 			do {
@@ -192,9 +209,10 @@ public:
 
 					char* comString = handler->extractQuotedArg((char*)args);
 					if (!comString)
-						return false;
+					return false;
 
 					std::string comment = comString;
+					char charmsg[200];
 					LoginDatabase.PExecute("UPDATE Account_Predator SET Comment='%s' WHERE Id='%u'", comment.c_str(), target->GetSession()->GetAccountId());
 					sprintf(charmsg, "|cff9cff00[PREDATOR] Predator comment updated for Account: %u, Character: %s by %s! Comment: %s|r", target->GetSession()->GetAccountId(), target->GetName(), gmName.c_str(), comString);
 					sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
@@ -206,11 +224,21 @@ public:
 
 	static bool HandleTogglePredatorCommand(ChatHandler* handler, const char* args)
 	{
-		if (!*args)
-			return false;
-
-		Player* target = handler->getSelectedPlayer();
+		Player* target;
+		uint64 targetGuid;
+		std::string targetName;
 		std::string gmName = handler->GetSession()->GetPlayerName();
+		std::string Comment = "NULL";
+
+		uint32 parseGUID = MAKE_NEW_GUID(atol((char*)args), 0, HIGHGUID_PLAYER);
+
+		if (sObjectMgr->GetPlayerNameByGUID(parseGUID, targetName))
+		{
+			target = sObjectMgr->GetPlayerByLowGUID(parseGUID);
+			targetGuid = parseGUID;
+		}
+		else if (!handler->extractPlayerTarget((char*)args, &target, &targetGuid, &targetName))
+			return false;
 
 		if (!target)
 		{
@@ -219,25 +247,35 @@ public:
 			return false;
 		}
 
+		//check player exist in table
+		if (Accid == target->GetSession()->GetAccountId())
+		{
+
+		}
+		else
+		{//create initial Predator entry for warning.
+			LoginDatabase.PExecute("REPLACE INTO Account_Predator VALUES('%u', '%s', '%u', '%u','%s')", target->GetSession()->GetAccountId(), target->GetName(), 0, 0, Comment.c_str());
+		}
+
 		if (target)
 		{
-			QueryResult result = LoginDatabase.PQuery("SELECT CharacterName, Predator FROM Account_Predator WHERE Id='%u'", target->GetSession()->GetAccountId());
-			if (!result)
+			QueryResult result = LoginDatabase.PQuery("SELECT `Id`, `CharacterName`, `Predator` FROM Account_Predator WHERE `Id`='%u'", target->GetSession()->GetAccountId());
+			if (result)
 			{
 			do {
 					Field* fields = result->Fetch();
-					std::string uName = fields[0].GetString();
-					int32 Predator = fields[1].GetInt32();
+					int32 Id = fields[0].GetInt32();
+					std::string chrName = fields[1].GetString();
+					int32 Predator = fields[2].GetInt32();
 					char* comString = handler->extractQuotedArg((char*)args);
-					if (!comString)
-						return false;
-
-					std::string comment = comString;
+					if (comString)
+					return false;
+					char charmsg[200];
 
 					if (Predator == 1)
 					{
 						LoginDatabase.PExecute("UPDATE Account_Predator SET Predator=0 WHERE Id='%u'", target->GetSession()->GetAccountId());
-						sprintf(charmsg, "|cff9cff00[PREDATOR] Predator turned off for Account: %u, Character: %s by %s!|r", target->GetSession()->GetAccountId(), target->GetName(), gmName.c_str());
+						sprintf(charmsg, "|cff9cff00[PREDATOR] Predator turned off for Account: %u, Character: %s by %s!|r", target->GetSession()->GetAccountId(), chrName.c_str(), gmName.c_str());
 						sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
 					}else
 					{
