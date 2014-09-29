@@ -3,7 +3,7 @@
 /* @ https://zwowz.com */
 /* Skype: leben.harvest */
 /* Feel free to modify/redistribute this script and its contents */
-/* Command Usage: .predator warn "target", .predator toggle "target", .predator comment "comment about selected player" */
+/* Command Usage: .predator warn "target name", .predator toggle "target name", .predator comment "comment about selected player"*/
 #include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "Chat.h"
@@ -11,10 +11,10 @@
 #include "Player.h"
 #include "ObjectMgr.h"
 #include "AccountMgr.h"
-int32 MinWarningsBeforeBan = 3;//3 warnings before character gets a ban
-int32 MaxWarningsBeforeBan = 7;//ban @ 7 warnings.
+int32 MinWarningsBeforeBan = 3;//3 warnings before day ban.
+int32 MaxWarningsBeforeBan = 7;//7 warnings before week ban.
 std::string DayBan = "86400000";//1 day ban / Miliseconds
-std::string WeekBan = "604800000";//7 day ban
+std::string WeekBan = "604800000";//7 day ban / Miliseconds
 int32 Accid = 0;
 
 class Predator : public PlayerScript
@@ -30,11 +30,9 @@ public:
 		int32 Warnings = 0;
 		char charmsg[200];
 		std::string Comment = "NULL";
-		result = LoginDatabase.PQuery("SELECT `Id`, `CharacterName`, `Predator`, `Warnings`, `Comment` FROM `Account_Predator` WHERE `Id` = '%u'", Accid);
-		if (result)
+		if (result = LoginDatabase.PQuery("SELECT `Id`, `CharacterName`, `Predator`, `Warnings`, `Comment` FROM `Account_Predator` WHERE `Id` = '%u'", Accid))
 		{
-			do
-			{
+			do {
 				Field *fields = result->Fetch();
 				Accid = fields[0].GetInt32();
 				std::string chrName = fields[1].GetString();
@@ -59,10 +57,9 @@ public:
 		int32 Warnings = 0;
 		char charmsg[200];
 		std::string Comment = "NULL";
-		result = LoginDatabase.PQuery("SELECT `Id`, `CharacterName`, `Predator`, `Warnings`, `Comment` FROM `Account_Predator` WHERE `Id` = '%u'", Accid);
-		if (result)
+		if (result = LoginDatabase.PQuery("SELECT `Id`, `CharacterName`, `Predator`, `Warnings`, `Comment` FROM `Account_Predator` WHERE `Id` = '%u'", Accid))
 		{
-		do {
+			do {
 				Field* fields = result->Fetch();
 				int32 Id = fields[0].GetInt32();
 				std::string chrName = fields[1].GetString();
@@ -129,10 +126,9 @@ public:
 
 		if (target)
 		{
-			QueryResult result = LoginDatabase.PQuery("SELECT `Id`, `CharacterName`, `Predator`, `Warnings`, `Comment` FROM `Account_Predator` WHERE `Id`='%u'", target->GetSession()->GetAccountId());
-			if (result)
+			if (QueryResult result = LoginDatabase.PQuery("SELECT `Id`, `CharacterName`, `Predator`, `Warnings`, `Comment` FROM `Account_Predator` WHERE `Id`='%u'", target->GetSession()->GetAccountId()))
 			{
-			do {
+				do {
 					Field* fields = result->Fetch();
 					Accid = fields[0].GetInt32();
 					std::string chrName = fields[1].GetString();
@@ -164,7 +160,7 @@ public:
 					if (Predator == 0)
 					{
 						LoginDatabase.PExecute("UPDATE Account_Predator SET Predator=1, Warnings=Warnings+1 WHERE Id='%u'", target->GetSession()->GetAccountId());
-						sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, has been flagged by %s for the PREDATOR System!|r", chrName.c_str(), target->GetName(), gmName.c_str());
+						sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, has been flagged by %s for the PREDATOR System!|r", Accid, target->GetName(), gmName.c_str());
 						sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
 					}else
 					{
@@ -174,7 +170,7 @@ public:
 					}
 				} while (result->NextRow());
 			}else
-			{//create initial Predator entry for warning.
+			{//create initial entry - warning.
 				char charmsg[200];
 				LoginDatabase.PExecute("INSERT INTO Account_Predator VALUES('%u', '%s', '%u', '%u','%s')", target->GetSession()->GetAccountId(), target->GetName(), 1, 1, Comment.c_str());
 				sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, Predator has been enabled for this account by %s!|r", target->GetSession()->GetAccountId(), target->GetName(), gmName.c_str());
@@ -200,10 +196,9 @@ public:
 
 		if (target)
 		{
-			QueryResult result = LoginDatabase.PQuery("SELECT `Id` FROM `Account_Predator` WHERE `Id`='%u'", target->GetSession()->GetAccountId());
-			if (result)
+			if (QueryResult result = LoginDatabase.PQuery("SELECT `Id` FROM `Account_Predator` WHERE `Id`='%u'", target->GetSession()->GetAccountId()))
 			{
-			do {
+				do {
 					Field* fields = result->Fetch();
 					int32 Id = fields[0].GetInt32();
 
@@ -247,29 +242,18 @@ public:
 			return false;
 		}
 
-		//check player exist in table
-		if (Accid == target->GetSession()->GetAccountId())
-		{
-
-		}
-		else
-		{//create initial Predator entry for warning.
-			LoginDatabase.PExecute("REPLACE INTO Account_Predator VALUES('%u', '%s', '%u', '%u','%s')", target->GetSession()->GetAccountId(), target->GetName(), 0, 0, Comment.c_str());
-		}
-
 		if (target)
 		{
-			QueryResult result = LoginDatabase.PQuery("SELECT `Id`, `CharacterName`, `Predator` FROM Account_Predator WHERE `Id`='%u'", target->GetSession()->GetAccountId());
-			if (result)
+			if (QueryResult result = LoginDatabase.PQuery("SELECT `Id`, `CharacterName`, `Predator` FROM Account_Predator WHERE `Id`='%u'", target->GetSession()->GetAccountId()))
 			{
-			do {
+				do {
 					Field* fields = result->Fetch();
 					int32 Id = fields[0].GetInt32();
 					std::string chrName = fields[1].GetString();
 					int32 Predator = fields[2].GetInt32();
 					char* comString = handler->extractQuotedArg((char*)args);
 					if (comString)
-					return false;
+						return false;
 					char charmsg[200];
 
 					if (Predator == 1)
@@ -277,13 +261,20 @@ public:
 						LoginDatabase.PExecute("UPDATE Account_Predator SET Predator=0 WHERE Id='%u'", target->GetSession()->GetAccountId());
 						sprintf(charmsg, "|cff9cff00[PREDATOR] Predator turned off for Account: %u, Character: %s by %s!|r", target->GetSession()->GetAccountId(), chrName.c_str(), gmName.c_str());
 						sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
-					}else
+					}
+					else
 					{
 						LoginDatabase.PExecute("UPDATE Account_Predator SET Predator=1 WHERE Id='%u'", target->GetSession()->GetAccountId());
 						sprintf(charmsg, "|cff9cff00[PREDATOR] Predator turned on for Account: %u, Character: %s by %s!|r", target->GetSession()->GetAccountId(), target->GetName(), gmName.c_str());
 						sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
 					}
 				} while (result->NextRow());
+			}else
+			{//Create initial entry - toggle.
+				char charmsg[200];
+				LoginDatabase.PExecute("INSERT INTO Account_Predator VALUES('%u', '%s', '%u', '%u','%s')", target->GetSession()->GetAccountId(), target->GetName(), 1, 0, Comment.c_str());
+				sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, Predator has been enabled for this account by %s!|r", target->GetSession()->GetAccountId(), target->GetName(), gmName.c_str());
+				sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
 			}
 		}
 		return true;
