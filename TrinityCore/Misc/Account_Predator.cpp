@@ -24,39 +24,39 @@ public:
 
 	void OnLogin(Player* player)
 	{
-		QueryResult result = LoginDatabase.PQuery("SELECT Id, CharacterName, Predator, Warnings, Comment FROM Account_Predator WHERE Id='%u'", player->GetSession()->GetAccountId());
-	do {
-			Field* fields = result->Fetch();
-			int32 Id = fields[0].GetInt32();
-			std::string Name = fields[1].GetString();
-			int32 Predator = fields[2].GetInt32();
-			int32 Warnings = fields[3].GetInt32();
-			std::string Comment = fields[4].GetString();
+		QueryResult result0 = LoginDatabase.PQuery("SELECT Id, CharacterName, Predator, Warnings, Comment FROM Account_Predator WHERE Id='%u'", player->GetSession()->GetAccountId());
+		do {
+			if (result0)
+			{
+				Field* fields = result0->Fetch();
+				int32 Id = fields[0].GetInt32();
+				std::string Name = fields[1].GetString();
+				int32 Predator = fields[2].GetInt32();
+				int32 Warnings = fields[3].GetInt32();
+				std::string Comment = fields[4].GetString();
 
-			if (Predator == 1 && Warnings >= 1)
-			{
-				sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, Has logged in. This player is under surveilence! This player has %u warnings. Most recent comment: %s|r", Id, player->GetName(), Warnings, Comment.c_str());
-				sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
+				if (Predator == 1 && Warnings >= 1)
+				{
+					sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, Has logged in. This player is under surveilence! This player has %u warnings. Most recent comment: %s|r", Id, player->GetName(), Warnings, Comment.c_str());
+					sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
+				}
 			}
-		} while (result->NextRow());
+		} while (result0->NextRow());
 		//Check if player already exist in predator table
-		if (player)
+		int32 Id = player->GetSession()->GetAccountId();
+		std::string Name = player->GetName();
+		std::string Comment = "NULL";
+		//
+		QueryResult result1 = LoginDatabase.PQuery("SELECT Id FROM Account_Predator WHERE Id='%u'", Id);
+		if (result1)
 		{
-			int32 Id = player->GetSession()->GetAccountId();
-			std::string Name = player->GetName();
-			std::string Comment = "NULL";
-			//
-			QueryResult result = LoginDatabase.PQuery("SELECT Id FROM Account_Predator WHERE Id='%u'", Id);
-			if (result)
-			{
 			do {
-					Field* fields = result->Fetch();
-					int32 Id = fields[0].GetInt32();
-				} while (result->NextRow());
-			}else
-			{//Create initial predator entry.
-				LoginDatabase.PExecute("INSERT INTO Account_Predator(Id, CharacterName, Predator, Warnings, Comment) VALUES ('%u', '%s', '%u', '%u', '%s')", Id, Name.c_str(), 0, 0, Comment.c_str());
-			}
+				Field* fields = result1->Fetch();
+				int32 Id = fields[0].GetInt32();
+			} while (result1->NextRow());
+		}else
+		{//Create initial predator entry.
+			LoginDatabase.PExecute("INSERT INTO Account_Predator(Id, CharacterName, Predator, Warnings, Comment) VALUES ('%u', '%s', '%u', '%u', '%s')", Id, Name.c_str(), 0, 0, Comment.c_str());
 		}
 	}
 
