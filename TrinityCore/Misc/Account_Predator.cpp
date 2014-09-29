@@ -132,7 +132,7 @@ public:
 					std::string plrban;
 					//ban
 					std::string banString;
-					banString = "Predator Auro-Ban - Exceeded warning limit!";
+					banString = "Predator Auto-Ban - Exceeded warning limit!";
 
 					if (Warnings >= MaxWarningsBeforeBan)//7+ strikes //1 week account ban
 					{
