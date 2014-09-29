@@ -86,7 +86,7 @@ public:
 
 	ChatCommand* GetCommands() const override
 	{
-		static ChatCommand gdCommandTable[] =
+		static ChatCommand CommandTable[] =
 		{
 			{ "warn", SEC_GAMEMASTER, false, &HandleWarnCommand, "", NULL },
 			{ "comment", SEC_GAMEMASTER, true, &HandleCommentCommand, "", NULL },
@@ -96,7 +96,7 @@ public:
 
 		static ChatCommand commandTable[] =
 		{
-			{ "predator", SEC_GAMEMASTER, false, NULL, "", gdCommandTable },
+			{ "predator", SEC_GAMEMASTER, false, NULL, "", CommandTable },
 			{ NULL, 0, false, NULL, "", NULL }
 		};
 		return commandTable;
