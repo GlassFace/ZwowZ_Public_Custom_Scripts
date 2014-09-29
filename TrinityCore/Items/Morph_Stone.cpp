@@ -5,8 +5,7 @@
 /* Feel free to modify/redistribute this script and its contents */
 class Morph_Stone : public ItemScript
 {
-public:
-	Morph_Stone() : ItemScript("Morph_Stone") { }
+public: Morph_Stone() : ItemScript("Morph_Stone"){}
 	char chrmsg[200];
 
 	bool OnUse(Player* player, Item* item, SpellCastTargets const& targets)
@@ -25,16 +24,16 @@ public:
 		switch (action)
 		{
 			//demorph
-		case 2:
-		{
-			player->DeMorph();
-			int32 DisplayId = player->GetDisplayId();
-			//tell player
-			sprintf(chrmsg, "|cff9cff00[Morph Stone] Default display Id restored to: %u.|r", DisplayId);
-			ChatHandler(player->GetSession()).SendSysMessage(chrmsg);
-			player->CLOSE_GOSSIP_MENU();
-			break;
-		}
+			case 2:
+			{
+				player->DeMorph();
+				int32 DisplayId = player->GetDisplayId();
+				//tell player
+				sprintf(chrmsg, "|cff9cff00[Morph Stone] Default display Id restored to: %u.|r", DisplayId);
+				ChatHandler(player->GetSession()).SendSysMessage(chrmsg);
+				player->CLOSE_GOSSIP_MENU();
+				break;
+			}
 		}
 	}
 
@@ -45,31 +44,31 @@ public:
 		{
 			switch (action)
 			{
-			case GOSSIP_ACTION_INFO_DEF + 1:
-			{
-				if (code > 0)
+				case GOSSIP_ACTION_INFO_DEF + 1:
 				{
-					//convert const char to int
-					uint32 CodeInt = atoi((char*)code);
-
-					if (CodeInt< 99999 && CodeInt> 1)//X less than max # && Greater than 1, Morph Player
+					if (code > 0)
 					{
-						//set display id
-						player->SetDisplayId(CodeInt);
-						//tell player
-						sprintf(chrmsg, "|cff9cff00[Morph Stone] Display Id set to %u.|r", CodeInt);
-						ChatHandler(player->GetSession()).SendSysMessage(chrmsg);
+						//convert const char to int
+						uint32 CodeInt = atoi((char*)code);
+
+						if (CodeInt< 99999 && CodeInt> 1)//X less than max # && Greater than 1, Morph Player
+						{
+							//set display id
+							player->SetDisplayId(CodeInt);
+							//tell player
+							sprintf(chrmsg, "|cff9cff00[Morph Stone] Display Id set to %u.|r", CodeInt);
+							ChatHandler(player->GetSession()).SendSysMessage(chrmsg);
+						}
+						else
+						{//Invalid Display ID
+							//tell player
+							sprintf(chrmsg, "|cff9cff00[Morph Stone] Not a valid display Id.|r");
+							ChatHandler(player->GetSession()).SendSysMessage(chrmsg);
+						}
 					}
-					else
-					{//Invalid Display ID
-						//tell player
-						sprintf(chrmsg, "|cff9cff00[Morph Stone] Not a valid display Id.|r");
-						ChatHandler(player->GetSession()).SendSysMessage(chrmsg);
-					}
+					player->CLOSE_GOSSIP_MENU();
+					break;
 				}
-				player->CLOSE_GOSSIP_MENU();
-				break;
-			}
 			}
 		}
 	}
