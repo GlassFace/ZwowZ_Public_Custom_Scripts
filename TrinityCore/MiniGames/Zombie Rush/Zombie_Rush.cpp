@@ -354,7 +354,7 @@ public:
 
 				//me->MonsterYell("Round 1 is starting now!", 0, 0);
 				//sendMessageToGroup("Round 1 is starting now!");
-				me->MonsterYell("If you die anytime during the event you will respawned at the end of the round! If the entire party dies you will be teleported to the mall.", 0, 0);
+				me->MonsterYell("If you die anytime during the event you will be respawned at the end of the round! If the entire party dies you will be teleported to the mall.", 0, 0);
 				/* NPC_START_NEXT_WAVE is despanwed when the next wave of zombies is to be sent */
 				me->SummonCreature(NPC_START_NEXT_WAVE, POS_NPC_NEXT_WAVE, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30 * 1000);
 			}
