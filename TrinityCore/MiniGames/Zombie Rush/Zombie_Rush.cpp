@@ -461,7 +461,7 @@ public:
 					zombieRound += 1;
 					me->MonsterYell(chrmsg, 0, 0);
 					sendMessageToGroup(chrmsg);
-					if (zombieRound <= 5)
+					if (zombieRound <= MaxRounds)
 					{
 						me->SummonCreature(NPC_WAIT_FOR_CHEST_LOOT, POS_NPC_WAIT_FOR_LOOT, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30 * 1000);
 						me->SummonGameObject(CHEST, CHEST_X, CHEST_Y, CHEST_Z, CHEST_O, TEMPSUMMON_TIMED_DESPAWN, 60 * 1000, 0, 0, 0);
