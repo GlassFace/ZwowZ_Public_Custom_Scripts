@@ -3,7 +3,7 @@
 /* @ https://zwowz.com */
 /* Skype: leben.harvest */
 /* Feel free to modify/redistribute this script and its contents */
-/* Command Usage: .predator warn "target name", .predator toggle "target name", .predator comment "comment about selected player"*/
+/* Command Usage: .predator warn "target", .predator toggle "target", .predator comment "comment about selected player"*/
 #include "ScriptPCH.h"
 #include "ScriptMgr.h"
 #include "Chat.h"
@@ -16,6 +16,7 @@ int32 MaxWarningsBeforeBan = 7;//7 warnings before week ban.
 std::string DayBan = "86400000";//1 day ban / Miliseconds
 std::string WeekBan = "604800000";//7 day ban / Miliseconds
 int32 Accid = 0;
+char charmsg[200];
 
 class Predator : public PlayerScript
 {
@@ -28,7 +29,6 @@ public:
 		Accid = player->GetSession()->GetAccountId();
 		int32 predator = 0;
 		int32 Warnings = 0;
-		char charmsg[200];
 		std::string Comment = "NULL";
 		if (result = LoginDatabase.PQuery("SELECT `Id`, `CharacterName`, `Predator`, `Warnings`, `Comment` FROM `Account_Predator` WHERE `Id` = '%u'", Accid))
 		{
@@ -41,7 +41,7 @@ public:
 				Comment = fields[4].GetString();
 
 				if (Accid == player->GetSession()->GetAccountId() && predator == 1)
-				{
+				{//I use get name not chrName.c_str(), this is becuase it allows us to see any character a flagged player logs in on.
 					sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, Has logged in. This player is under surveilence! Warnings: %u, Comment: %s|r", Accid, player->GetName(), Warnings, Comment.c_str());
 					sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
 				}
@@ -55,7 +55,6 @@ public:
 		Accid = player->GetSession()->GetAccountId();
 		int32 predator = 0;
 		int32 Warnings = 0;
-		char charmsg[200];
 		std::string Comment = "NULL";
 		if (result = LoginDatabase.PQuery("SELECT `Id`, `CharacterName`, `Predator`, `Warnings`, `Comment` FROM `Account_Predator` WHERE `Id` = '%u'", Accid))
 		{
@@ -135,12 +134,10 @@ public:
 					int32 Predator = fields[2].GetInt32();
 					int32 Warnings = fields[3].GetInt32();
 					Comment = fields[4].GetString();
-					std::string plrban;
 					//ban
+					std::string plrban;
 					std::string banString;
 					banString = "Predator Auto-Ban - Exceeded warning limit!";
-					//
-					char charmsg[200];
 
 					if (Warnings >= MaxWarningsBeforeBan)//7+ strikes //1 week account ban
 					{
@@ -171,7 +168,6 @@ public:
 				} while (result->NextRow());
 			}else
 			{//create initial entry - warning.
-				char charmsg[200];
 				LoginDatabase.PExecute("INSERT INTO Account_Predator VALUES('%u', '%s', '%u', '%u','%s')", target->GetSession()->GetAccountId(), target->GetName(), 1, 1, Comment.c_str());
 				sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, Predator has been enabled for this account by %s!|r", target->GetSession()->GetAccountId(), target->GetName(), gmName.c_str());
 				sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
@@ -207,7 +203,6 @@ public:
 					return false;
 
 					std::string comment = comString;
-					char charmsg[200];
 					LoginDatabase.PExecute("UPDATE Account_Predator SET Comment='%s' WHERE Id='%u'", comment.c_str(), target->GetSession()->GetAccountId());
 					sprintf(charmsg, "|cff9cff00[PREDATOR] Predator comment updated for Account: %u, Character: %s by %s! Comment: %s|r", target->GetSession()->GetAccountId(), target->GetName(), gmName.c_str(), comString);
 					sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
@@ -254,7 +249,6 @@ public:
 					char* comString = handler->extractQuotedArg((char*)args);
 					if (comString)
 						return false;
-					char charmsg[200];
 
 					if (Predator == 1)
 					{
@@ -271,7 +265,6 @@ public:
 				} while (result->NextRow());
 			}else
 			{//Create initial entry - toggle.
-				char charmsg[200];
 				LoginDatabase.PExecute("INSERT INTO Account_Predator VALUES('%u', '%s', '%u', '%u','%s')", target->GetSession()->GetAccountId(), target->GetName(), 1, 0, Comment.c_str());
 				sprintf(charmsg, "|cff9cff00[PREDATOR] Account: %u, Character: %s, Predator has been enabled for this account by %s!|r", target->GetSession()->GetAccountId(), target->GetName(), gmName.c_str());
 				sWorld->SendGMText(LANG_GM_BROADCAST, charmsg);
