@@ -502,7 +502,7 @@ public:
 				}
 				break;
 			}
-			case NPC_END_GAME:
+			case MG_NPC_END_GAME:
 			{
 				sprintf(chrmsg, "The Game Has Ended.");
 				me->MonsterYell(chrmsg, 0, 0);
