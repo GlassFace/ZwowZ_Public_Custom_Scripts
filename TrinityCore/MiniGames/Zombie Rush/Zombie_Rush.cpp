@@ -669,16 +669,16 @@ public:
 
 		int getNumberOfWaves()
 		{
+			if (zombieRound >= 5)
+			return 7;
+			if (zombieRound >= 4)
+			return 6;
+			if (zombieRound >= 3)
+			return 5;
+			if (zombieRound >= 2)
+			return 4;
 			if (zombieRound <= 1)
-				return 3;
-			if (zombieRound <= 2)
-				return 4;
-			if (zombieRound <= 3)
-				return 5;
-			if (zombieRound <= 4)
-				return 6;
-			if (zombieRound <= 5)
-				return 7;
+			return 3;
 		}
 
 		int getZombieSpawnCount(Creature* creature)
