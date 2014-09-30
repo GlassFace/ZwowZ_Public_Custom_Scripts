@@ -25,7 +25,7 @@ int8 zombieSpawnPerWave = 0;
 //stores how many players are in the group
 int8 zombieGroupMembers = 0;
 //stores number of zombies spawn per each person
-int8 ZOMBIES_PER_PERSON = 0;
+int8 ZOMBIES_PER_PERSON = 3;
 int8 MaxRounds = 5;
 int8 inProgress = 0;
 bool inZombieGame;
@@ -37,10 +37,10 @@ Group* playerGroup;
 /* SET THE MAP, X, Y, Z LOCATIONS, CREATE CREATURES AND SET SCRIPT NAMES. CREATE GAME OBJECT FOR CHEST(s) */
 
 //chest gps loc
-float CHEST_X = 0;
-float CHEST_Y = 0;
-float CHEST_Z = 0;
-float CHEST_O = 0;
+float CHEST_X = 0.0f;
+float CHEST_Y = 0.0f;
+float CHEST_Z = 0.0f;
+float CHEST_O = 0.0f;
 //creatures
 WorldLocation POS_MINIGAME_START(0, 0.0f, 0.0f, 0.0f, 0.0f);
 WorldLocation POS_NPC_START_GAME(0, 0.0f, 0.0f, 0.0f, 0.0f);
@@ -225,37 +225,37 @@ public:
 
 			switch (uiAction)
 			{
-			case GOSSIP_ACTION_INFO_DEF + 1:
-			{
-				for (grpRef; grpRef != NULL; grpRef = grpRef->next())
+				case GOSSIP_ACTION_INFO_DEF + 1:
 				{
-					Player* groupMember = grpRef->getSource();
-					ChatHandler(player->GetSession()).PSendSysMessage("Sending summon request to...");
-					if (!groupMember)
-						continue;
-					if (groupMember->GetGUID() == player->GetGUID())
-						break;
-					player->SetSelection(groupMember->GetGUID());
-					player->CastSpell(groupMember, 7720, true);
-					ChatHandler(player->GetSession()).PSendSysMessage("%s", groupMember->GetName());
+					for (grpRef; grpRef != NULL; grpRef = grpRef->next())
+					{
+						Player* groupMember = grpRef->getSource();
+						ChatHandler(player->GetSession()).PSendSysMessage("Sending summon request to...");
+						if (!groupMember)
+							continue;
+						if (groupMember->GetGUID() == player->GetGUID())
+							break;
+						player->SetSelection(groupMember->GetGUID());
+						player->CastSpell(groupMember, 7720, true);
+						ChatHandler(player->GetSession()).PSendSysMessage("%s", groupMember->GetName());
+					}
+					break;
 				}
-				break;
-			}
-			case GOSSIP_ACTION_INFO_DEF + 2:
-			{
-				creature->MonsterYell("Round 1 starts in 30 seconds!", 0, 0);
-				/* spawn NPC_START_GAME to despawn after 30 seconds and start the game */
-				creature->SummonCreature(NPC_START_GAME, POS_NPC_START_GAME, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1 * 1000);
-				/* the main NPC will not be seen again by the group so teleport him away */
-				creature->UpdatePosition(POS_NPC_RESET, true);
-				break;
-			}
-			case GOSSIP_ACTION_INFO_DEF + 3:
-			{
-				creature->MonsterYell("The group leader ended the zombie rush minigame!", 0, 0);
-				creature->SummonCreature(NPC_END_GAME, POS_NPC_END_GAME, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 500);
-				break;
-			}
+				case GOSSIP_ACTION_INFO_DEF + 2:
+				{
+					creature->MonsterYell("Round 1 starts in 30 seconds!", 0, 0);
+					/* spawn NPC_START_GAME to despawn after 30 seconds and start the game */
+					creature->SummonCreature(NPC_START_GAME, POS_NPC_START_GAME, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1 * 1000);
+					/* the main NPC will not be seen again by the group so teleport him away */
+					creature->UpdatePosition(POS_NPC_RESET, true);
+					break;
+				}
+				case GOSSIP_ACTION_INFO_DEF + 3:
+				{
+					creature->MonsterYell("The group leader ended the zombie rush minigame!", 0, 0);
+					creature->SummonCreature(NPC_END_GAME, POS_NPC_END_GAME, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 500);
+					break;
+				}
 			}
 		}
 		player->PlayerTalkClass->SendCloseGossip();
@@ -387,128 +387,128 @@ public:
 
 			switch (summonID)
 			{
-			case NPC_WAIT_FOR_END_ROUND:
-			{
-				//End Event
-				if (inProgress == 1)
+				case NPC_WAIT_FOR_END_ROUND:
 				{
-					sprintf(chrmsg, "Game ended or not in progress! Resetting game!");
-					me->MonsterYell(chrmsg, 0, 0);
-					ResetZombieGame();
-					return;
-				}
-				//revive group & reset if group failed game.
-				reviveGroup();
-				//All Enemy NPCS killed, Continue Game.
-				if (zombiesSpawned < 1)
-				{
-					sprintf(chrmsg, "All enemies killed continuing game!");
-					me->MonsterYell(chrmsg, 0, 0);
-					zombiesSpawned = 0;
-					/* NPC_START_NEXT_WAVE is despanwed when the next wave of zombies is to be sent */
-					me->SummonCreature(NPC_START_NEXT_WAVE, POS_NPC_NEXT_WAVE, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1 * 1000);
-				}
-				else
-				{
-					sprintf(chrmsg, "You must kill all enemies to continue the game!");
-					me->MonsterYell(chrmsg, 0, 0);
-					me->SummonCreature(NPC_WAIT_FOR_END_ROUND, POS_NPC_END_ROUND, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30 * 1000);
+					//End Event
+					if (inProgress == 1)
+					{
+						sprintf(chrmsg, "Game ended or not in progress! Resetting game!");
+						me->MonsterYell(chrmsg, 0, 0);
+						ResetZombieGame();
+						return;
+					}
+					//revive group & reset if group failed game.
+					reviveGroup();
+					//All Enemy NPCS killed, Continue Game.
+					if (zombiesSpawned < 1)
+					{
+						sprintf(chrmsg, "All enemies killed continuing game!");
+						me->MonsterYell(chrmsg, 0, 0);
+						zombiesSpawned = 0;
+						/* NPC_START_NEXT_WAVE is despanwed when the next wave of zombies is to be sent */
+						me->SummonCreature(NPC_START_NEXT_WAVE, POS_NPC_NEXT_WAVE, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 1 * 1000);
+					}
+					else
+					{
+						sprintf(chrmsg, "You must kill all enemies to continue the game!");
+						me->MonsterYell(chrmsg, 0, 0);
+						me->SummonCreature(NPC_WAIT_FOR_END_ROUND, POS_NPC_END_ROUND, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30 * 1000);
+						break;
+					}
 					break;
 				}
-				break;
-			}
-				/* called when a wave of zombies needs to be spawned */
-			case NPC_START_NEXT_WAVE:
-			{
-				me->SetVisible(false);//Set npc to invisible /* Players may only summon new/existing group memebers during the end of a round.*/
-				if (inProgress == 1)
+					/* called when a wave of zombies needs to be spawned */
+				case NPC_START_NEXT_WAVE:
 				{
-					sprintf(chrmsg, "Game Ended or not in progress! Resetting game!");
-					me->MonsterYell(chrmsg, 0, 0);
-					ResetZombieGame();
-					return;
-				}
-				//check if zombies are still alive, if so spawn wait for end of round npc.
-				if (zombiesSpawned > 0)
-				{
-					sprintf(chrmsg, "Waiting for all creatures to be slain to resume the game!");
-					me->MonsterYell(chrmsg, 0, 0);
-					me->SummonCreature(NPC_WAIT_FOR_END_ROUND, POS_NPC_END_ROUND, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30 * 1000);
-					return;
-				}
-				// wave check
-				if (zombieWavesCount <= getNumberOfWaves())
-				{
-					//spawn
-					sprintf(chrmsg, "Wave %u has spawned!", zombieWavesCount);
-					me->MonsterYell(chrmsg, 0, 0);
-					sendMessageToGroup(chrmsg);
-					/* calc how many waves of zombies to send */
-					zombieWaves = getNumberOfWaves();
-					/* calc how many zombies per wave */
-					zombieSpawnPerWave = getZombieSpawnCountPerWave();
-					//
-					spawnZombies(me, zombieSpawnPerWave);
-					zombieWavesCount += 1;
-					//
-					me->SummonCreature(NPC_START_NEXT_WAVE, POS_NPC_NEXT_WAVE, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20 * 1000);
-				}
-				else
-				{
-					//spawn
-					sprintf(chrmsg, "Round %u Chest has spawned! You have 60 seconds to loot & prepare.", zombieRound);
-					//round cleared +1
-					zombieRound += 1;
-					me->MonsterYell(chrmsg, 0, 0);
-					sendMessageToGroup(chrmsg);
-					if (zombieRound <= MaxRounds)
+					me->SetVisible(false);//Set npc to invisible /* Players may only summon new/existing group memebers during the end of a round.*/
+					if (inProgress == 1)
 					{
-						me->SummonCreature(NPC_WAIT_FOR_CHEST_LOOT, POS_NPC_WAIT_FOR_LOOT, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30 * 1000);
-						me->SummonGameObject(CHEST, CHEST_X, CHEST_Y, CHEST_Z, CHEST_O, TEMPSUMMON_TIMED_DESPAWN, 60 * 1000, 0, 0, 0);
+						sprintf(chrmsg, "Game Ended or not in progress! Resetting game!");
+						me->MonsterYell(chrmsg, 0, 0);
+						ResetZombieGame();
+						return;
 					}
-					//revice group & check if group failed game.
-					reviveGroup();
-					//resurrect dead players
+					//check if zombies are still alive, if so spawn wait for end of round npc.
+					if (zombiesSpawned > 0)
+					{
+						sprintf(chrmsg, "Waiting for all creatures to be slain to resume the game!");
+						me->MonsterYell(chrmsg, 0, 0);
+						me->SummonCreature(NPC_WAIT_FOR_END_ROUND, POS_NPC_END_ROUND, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30 * 1000);
+						return;
+					}
+					// wave check
+					if (zombieWavesCount <= getNumberOfWaves())
+					{
+						//spawn
+						sprintf(chrmsg, "Wave %u has spawned!", zombieWavesCount);
+						me->MonsterYell(chrmsg, 0, 0);
+						sendMessageToGroup(chrmsg);
+						/* calc how many waves of zombies to send */
+						zombieWaves = getNumberOfWaves();
+						/* calc how many zombies per wave */
+						zombieSpawnPerWave = getZombieSpawnCountPerWave();
+						//
+						spawnZombies(me, zombieSpawnPerWave);
+						zombieWavesCount += 1;
+						//
+						me->SummonCreature(NPC_START_NEXT_WAVE, POS_NPC_NEXT_WAVE, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20 * 1000);
+					}
+					else
+					{
+						//spawn
+						sprintf(chrmsg, "Round %u Chest has spawned! You have 60 seconds to loot & prepare.", zombieRound);
+						//round cleared +1
+						zombieRound += 1;
+						me->MonsterYell(chrmsg, 0, 0);
+						sendMessageToGroup(chrmsg);
+						if (zombieRound <= MaxRounds)
+						{
+							me->SummonCreature(NPC_WAIT_FOR_CHEST_LOOT, POS_NPC_WAIT_FOR_LOOT, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30 * 1000);
+							me->SummonGameObject(CHEST, CHEST_X, CHEST_Y, CHEST_Z, CHEST_O, TEMPSUMMON_TIMED_DESPAWN, 60 * 1000, 0, 0, 0);
+						}
+						//revice group & check if group failed game.
+						reviveGroup();
+						//resurrect dead players
+					}
+					break;
 				}
-				break;
-			}
-			case NPC_WAIT_FOR_CHEST_LOOT:
-			{
-				if (inProgress == 1)
-				{//End Game
-					char msg[200];
-					sprintf(msg, "Game Ended or not in progress! Resetting event!");
-					me->MonsterYell(msg, 0, 0);
+				case NPC_WAIT_FOR_CHEST_LOOT:
+				{
+					if (inProgress == 1)
+					{//End Game
+						char msg[200];
+						sprintf(msg, "Game Ended or not in progress! Resetting event!");
+						me->MonsterYell(msg, 0, 0);
+						ResetZombieGame();
+						return;
+					}
+					if (zombieRound <= MaxRounds)
+					{//Continue Game
+						sprintf(chrmsg, "Round %u is starting!", zombieRound);
+						me->MonsterYell(chrmsg, 0, 0);
+						sendMessageToGroup(chrmsg);
+						me->SetVisible(false);/* Disallow players from summoning while a round is in progress. */
+						zombieWaves = getNumberOfWaves();						/* calc how many waves of zombies to send */
+						zombieSpawnPerWave = getZombieSpawnCountPerWave();		/* calc how many zombies per wave */
+						zombieWavesCount = 1;//reset current wave
+						sprintf(chrmsg, "30 Seconds left to loot chests & prepare! The next wave starts in 30 seconds!");
+						me->MonsterYell(chrmsg, 0, 0);
+						sendMessageToGroup(chrmsg);
+						me->SummonCreature(NPC_START_NEXT_WAVE, POS_NPC_START_GAME, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30 * 1000);
+					}
+					break;
+				}
+				case NPC_END_GAME:
+				{
+					sprintf(chrmsg, "The Game Has Ended.");
+					me->MonsterYell(chrmsg, 0, 0);
+					sendMessageToGroup(chrmsg);
+					inProgress = 0;//0 - Inactive
 					ResetZombieGame();
-					return;
+					me->SetVisible(true);
+					break;
 				}
-				if (zombieRound <= MaxRounds)
-				{//Continue Game
-					sprintf(chrmsg, "Round %u is starting!", zombieRound);
-					me->MonsterYell(chrmsg, 0, 0);
-					sendMessageToGroup(chrmsg);
-					me->SetVisible(false);/* Disallow players from summoning while a round is in progress. */
-					zombieWaves = getNumberOfWaves();						/* calc how many waves of zombies to send */
-					zombieSpawnPerWave = getZombieSpawnCountPerWave();		/* calc how many zombies per wave */
-					zombieWavesCount = 1;//reset current wave
-					sprintf(chrmsg, "30 Seconds left to loot chests & prepare! The next wave starts in 30 seconds!");
-					me->MonsterYell(chrmsg, 0, 0);
-					sendMessageToGroup(chrmsg);
-					me->SummonCreature(NPC_START_NEXT_WAVE, POS_NPC_START_GAME, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30 * 1000);
-				}
-				break;
-			}
-			case NPC_END_GAME:
-			{
-				sprintf(chrmsg, "The Game Has Ended.");
-				me->MonsterYell(chrmsg, 0, 0);
-				sendMessageToGroup(chrmsg);
-				inProgress = 0;//0 - Inactive
-				ResetZombieGame();
-				me->SetVisible(true);
-				break;
-			}
-			default:
+				default:
 				if (summonID == 500621)
 					sprintf(chrmsg, "Zombie Killed.");
 				me->MonsterYell(chrmsg, 0, 0);
