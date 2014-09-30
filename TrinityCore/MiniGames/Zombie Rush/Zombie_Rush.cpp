@@ -87,7 +87,7 @@ public:
 	{
 		if (player->isInCombat())
 		{
-			return closeGossipNotify(player, "You can't start the zombie event while being in combat.");
+			return closeGossipNotify(player, "You can't start the zombie MiniGame while being in combat.");
 		}
 
 		if (!player->GetGroup() || player->GetGroup() == NULL)
@@ -125,7 +125,7 @@ public:
 			{
 				return closeGossipNotify(player, "A game is currently in progress!");
 			}
-			inZombieGame = true;//game is true new groups can not join until event is over!
+			inZombieGame = true;//game is true new groups can not join until MiniGame is over!
 			grp->ConvertToRaid();
 			player->TeleportTo(POS_MINIGAME_START);
 			zombie_inUse = true;
@@ -355,7 +355,7 @@ public:
 
 				//me->MonsterYell("Round 1 is starting now!", 0, 0);
 				//sendMessageToGroup("Round 1 is starting now!");
-				me->MonsterYell("If you die anytime during the event you will be respawned at the end of the round! If the entire party dies you will be teleported to the mall.", 0, 0);
+				me->MonsterYell("If you die anytime during the MiniGame you will be respawned at the end of the round! If the entire party dies you will be teleported to the mall.", 0, 0);
 				/* NPC_START_NEXT_WAVE is despanwed when the next wave of zombies is to be sent */
 				me->SummonCreature(MG_NPC_START_NEXT_WAVE, POS_NPC_NEXT_WAVE, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30 * 1000);
 			}
@@ -390,7 +390,7 @@ public:
 			{
 			case MG_NPC_WAIT_FOR_END_ROUND:
 			{
-				//End Event
+				//End MiniGame
 				if (inProgress == 1)
 				{
 					sprintf(chrmsg, "Game ended or not in progress! Resetting game!");
@@ -478,7 +478,7 @@ public:
 				if (inProgress == 1)
 				{//End Game
 					char msg[200];
-					sprintf(msg, "Game Ended or not in progress! Resetting event!");
+					sprintf(msg, "Game Ended or not in progress! Resetting MiniGame!");
 					me->MonsterYell(msg, 0, 0);
 					ResetZombieGame();
 					return;
