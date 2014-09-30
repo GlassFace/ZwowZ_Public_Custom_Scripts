@@ -71,12 +71,12 @@ enum zombie_minigame_DATA
 	CHEST = 12,
 };
 
-/*bool closeGossipNotify(Player *player, std::string message)
+bool closeGossipNotify(Player *player, std::string message)
 {
 	player->PlayerTalkClass->SendCloseGossip();
 	player->GetSession()->SendNotification(message.c_str());
 	return true;
-}*/
+}
 
 class zombie_minigame_master : public CreatureScript
 {
