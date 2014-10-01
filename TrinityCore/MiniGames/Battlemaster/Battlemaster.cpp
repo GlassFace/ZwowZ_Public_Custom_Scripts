@@ -76,7 +76,7 @@ public:
 				case 2://Summon Jaina
 				{
 					player->CLOSE_GOSSIP_MENU();
-					_creature->MonsterYell("The Battle Against Jaina  Has Begun!", LANG_UNIVERSAL, 0);
+					_creature->MonsterYell("The Battle Against Jaina Has Begun!", LANG_UNIVERSAL, 0);
 					_creature->SummonCreature(GLADIATOR_JAINA, SpawnPos[0], TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 60000);//One minute out of comabat despawn.
 					FightInProgress = 1;//set fight in progress
 					break;
