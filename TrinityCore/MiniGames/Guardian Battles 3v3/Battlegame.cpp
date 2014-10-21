@@ -31,9 +31,6 @@ char chrmsg[200];
 
 //TELEPORTS
 WorldLocation POS_TELE_MALL(870, 1698.93f, 1917.43f, 230.95f, 2.32f);//Server Mall/Spawn
-WorldLocation POS_GROUP_ONE_TELE_REVIVE(189, 821.25f, 505.06f, 0, 5.4f);//GROUP 1 SPAWN
-WorldLocation POS_GROUP_TWO_TELE_REVIVE(189, 927.47f, 373.69f, 0, 2.2);//GROUP 2 SPAWN
-WorldLocation POS_GAME_LEADER_START(189, 815.93f, 331.41f, 0, 0.23f);//Game leader initial summon location
 
 //CONTROL NPCS
 WorldLocation POS_BATTLE_NPC_START_GAME(189, 821.25f, 505.06f, 0, 5.4f);//spawn loc of control npc
