@@ -12,31 +12,8 @@
 //Game defaults
 int32 Minions_Per_Wave = 1;
 
-//players //TODO implement player tracking to record scores/stats etc
-//g1
-Player* G1Player1 = NULL;
-Player* G1Player2 = NULL;
-Player* G1Player3 = NULL;
-Player* G1Player4 = NULL;
-Player* G1Player5 = NULL;
-//g2
-Player* G2Player1 = NULL;
-Player* G2Player2 = NULL;
-Player* G2Player3 = NULL;
-Player* G2Player4 = NULL;
-Player* G2Player5 = NULL;
-
-//char
+//char msg
 char chrmsg[200];
-
-//TELEPORTS
-WorldLocation POS_TELE_MALL(870, 1698.93f, 1917.43f, 230.95f, 2.32f);//Server Mall/Spawn
-
-//CONTROL NPCS
-WorldLocation POS_BATTLE_NPC_START_GAME(189, 821.25f, 505.06f, 0, 5.4f);//spawn loc of control npc
-WorldLocation POS_BATTLE_NPC_NEXT_MINION_WAVE(189, 821.25f, 505.06f, 0, 5.4f); 
-WorldLocation POS_BATTLE_NPC_CHECK_GAME(189, 821.25f, 505.06f, 0, 5.4f);
-WorldLocation POS_BATTLE_NPC_END_GAME(189, 821.25f, 505.06f, 0, 5.4f);
 
 enum Guardian_Battle_Data
 {
@@ -89,7 +66,7 @@ enum Guardian_Battle_Data
 	check_scarlet_minion_pathing_middle = 76002,
 };
 
-//World map positions
+//Initial spawns
 //red creatures
 WorldLocation POS_3v3_NPC_SCARLET_GUARDIAN(189, 675, 406, 0, 5.4);
 WorldLocation POS_3v3_NPC_SCARLET_CHAMPION1(189, 659, 355, 0, 5.4);
@@ -151,13 +128,21 @@ WorldLocation POS_3v3_RANDOM_SCARLET_MINION_MOVETO_random(189, 888, 156, 0, 0);
 WorldLocation POS_3v3_RANDOM_SCARLET_MINION_MOVETO_left(189, 885, 128, 0, 0);
 WorldLocation POS_3v3_RANDOM_SCARLET_MINION_MOVETO_right(189, 922, 178, 0, 0);
 
+//CONTROL NPC POS
+WorldLocation POS_BATTLE_NPC_START_GAME(189, 821.25f, 505.06f, 0, 5.4f);//spawn loc of control npc
+WorldLocation POS_BATTLE_NPC_NEXT_MINION_WAVE(189, 821.25f, 505.06f, 0, 5.4f); 
+WorldLocation POS_BATTLE_NPC_CHECK_GAME(189, 821.25f, 505.06f, 0, 5.4f);
+WorldLocation POS_BATTLE_NPC_END_GAME(189, 821.25f, 505.06f, 0, 5.4f);
+
 //TELEPORTS
+WorldLocation POS_TELE_MALL(870, 1698.93f, 1917.43f, 230.95f, 2.32f);//Server Mall/Spawn
 WorldLocation POS_3v3_GROUP_ONE_TELE_REVIVE(189, 924, 116, 0, 2.4);//GROUP 1 SPAWN
 WorldLocation POS_3v3_GROUP_TWO_TELE_REVIVE(189, 667, 416, 0, 5.4);//GROUP 2 SPAWN
 WorldLocation POS_3v3_GAME_LEADER_START(189, 600, 414, 0, 5.4);//Game leader start
 
 //Game status
 int32 GameInProgress3v3 = 0;
+int32 GameStarted3v3 = 0;
 
 //Player/Group 1 variables
 int32 Group1GuardianAlive3v3 = 0;
@@ -675,7 +660,6 @@ public:
 			{
 				sprintf(chrmsg, "Undead Guardian Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group one undead
 				Group1GuardianAlive3v3 = 0;
 				break;
 			}
@@ -683,7 +667,6 @@ public:
 			{
 				sprintf(chrmsg, "Undead Champion 1 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group1Champion1Alive3v3 = 0;
 				break;
 			}
@@ -691,7 +674,6 @@ public:
 			{
 				sprintf(chrmsg, "Undead Champion 2 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group1Champion2Alive3v3 = 0;
 				break;
 			}
@@ -699,7 +681,6 @@ public:
 			{
 				sprintf(chrmsg, "Undead Sentinel 1 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group1Sentinel1Alive3v3 = 0;
 				break;
 			}
@@ -707,7 +688,6 @@ public:
 			{
 				sprintf(chrmsg, "Undead Sentinel 2 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group1Sentinel2Alive3v3 = 0;
 				break;
 			}
@@ -715,7 +695,6 @@ public:
 			{
 				sprintf(chrmsg, "Undead Sentinel 3 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group1Sentinel3Alive3v3 = 0;
 				break;
 			}
@@ -723,7 +702,6 @@ public:
 			{
 				sprintf(chrmsg, "Undead Sentinel 4 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group1Sentinel4Alive3v3 = 0;
 				break;
 			}
@@ -731,7 +709,6 @@ public:
 			{
 				sprintf(chrmsg, "Undead Sentinel 5 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group1Sentinel5Alive3v3 = 0;
 				break;
 			}
@@ -739,7 +716,6 @@ public:
 			{
 				sprintf(chrmsg, "Undead Sentinel 6 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group1Sentinel6Alive3v3 = 0;
 				break;
 			}
@@ -747,7 +723,6 @@ public:
 			{
 				sprintf(chrmsg, "Scarlet Guardian Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group2GuardianAlive3v3 = 0;
 				break;
 			}
@@ -755,7 +730,6 @@ public:
 			{
 				sprintf(chrmsg, "Scarlet Champion 1 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group2Champion1Alive3v3 = 0;
 				break;
 			}
@@ -763,7 +737,6 @@ public:
 			{
 				sprintf(chrmsg, "Scarlet Champion 2 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group2Champion2Alive3v3 = 0;
 				break;
 			}
@@ -771,7 +744,6 @@ public:
 			{
 				sprintf(chrmsg, "Scarlet Sentinel 1 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group2Sentinel1Alive3v3 = 0;
 				break;
 			}
@@ -779,7 +751,6 @@ public:
 			{
 				sprintf(chrmsg, "Scarlet Sentinel 2 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group2Sentinel2Alive3v3 = 0;
 				break;
 			}
@@ -787,7 +758,6 @@ public:
 			{
 				sprintf(chrmsg, "Scarlet Sentinel 3 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group2Sentinel3Alive3v3 = 0;
 				break;
 			}
@@ -795,7 +765,6 @@ public:
 			{
 				sprintf(chrmsg, "Scarlet Sentinel 4 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group2Sentinel4Alive3v3 = 0;
 				break;
 			}
@@ -803,7 +772,6 @@ public:
 			{
 				sprintf(chrmsg, "Scarlet Sentinel 5 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group2Sentinel5Alive3v3 = 0;
 				break;
 			}
@@ -811,7 +779,6 @@ public:
 			{
 				sprintf(chrmsg, "Scarlet Sentinel 6 Slain!");
 				me->MonsterYell(chrmsg, 0, 0);
-				//Group two scarlet
 				Group2Sentinel6Alive3v3 = 0;
 				break;
 			}
